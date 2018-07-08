@@ -28,3 +28,13 @@ copy the config file and pem files to the datanode 1-3
    41  scp config datanode1:~/.ssh/
    42  scp config datanode2:~/.ssh/
    43  scp config datanode3:~/.ssh/
+
+
+######On the Name node generate the key
+ssh namenode
+ssh-keygen -f ~/.ssh/id_rsa -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+########### and copy the above to all 3 datanodes
+ssh datanode1 'cat >> ~/.ssh/authorized_keys' < ~/.ssh/id_rsa.pub
+ssh datanode2 'cat >> ~/.ssh/authorized_keys' < ~/.ssh/id_rsa.pub
+ssh datanode3 'cat >> ~/.ssh/authorized_keys' < ~/.ssh/id_rsa.pub
