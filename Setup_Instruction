@@ -38,3 +38,9 @@ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ssh datanode1 'cat >> ~/.ssh/authorized_keys' < ~/.ssh/id_rsa.pub
 ssh datanode2 'cat >> ~/.ssh/authorized_keys' < ~/.ssh/id_rsa.pub
 ssh datanode3 'cat >> ~/.ssh/authorized_keys' < ~/.ssh/id_rsa.pub
+
+
+
+#####update and install the software on all host 
+sudo apt-get update
+sudo apt-get install openjdk-8-jdk
