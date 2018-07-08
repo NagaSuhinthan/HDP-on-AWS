@@ -1,1 +1,18 @@
 ### This is the setup for AWS HDP
+###Hostname Setup
+Host namenode
+  HostName ec2-54-171-61-0.eu-west-1.compute.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/MyLab_Machine.pem
+Host datanode1
+  HostName ec2-34-254-242-110.eu-west-1.compute.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/MyLab_Machine.pem
+Host datanode2
+  HostName ec2-54-171-141-96.eu-west-1.compute.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/MyLab_Machine.pem
+Host datanode3
+  HostName ec2-34-244-144-57.eu-west-1.compute.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/MyLab_Machine.pem
