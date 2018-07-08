@@ -21,13 +21,13 @@ Host datanode3
 
 ############# Set the pem file to chmod 600 inorder to work with ssh
 copy the config file and pem files to the datanode 1-3
-  scp MyLab_Machine.pem datanode1:~/.ssh/
-   38  scp MyLab_Machine.pem datanode2:~/.ssh/
-   39  scp MyLab_Machine.pem datanode3:~/.ssh/
-   40  ls -lrt
-   41  scp config datanode1:~/.ssh/
-   42  scp config datanode2:~/.ssh/
-   43  scp config datanode3:~/.ssh/
+scp MyLab_Machine.pem datanode1:~/.ssh/
+scp MyLab_Machine.pem datanode2:~/.ssh/
+scp MyLab_Machine.pem datanode3:~/.ssh/
+  
+ scp config datanode1:~/.ssh/
+ scp config datanode2:~/.ssh/
+ scp config datanode3:~/.ssh/
 
 
 ######On the Name node generate the key
