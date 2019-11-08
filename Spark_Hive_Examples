@@ -19,7 +19,7 @@ spark = (
 )
  
 def BasicMaster():
-    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines = spark.read.format("csv").load("file:///ppppro/server/data/npl_basic" ,header="true")
     lines.printSchema()
     lines.write.format("csv").save("hdfs://mycompany.com:8020/tmp/dev3/raw_data/npl_basic/" ,mode="overwrite")
 if __name__ == '__main__':
@@ -28,7 +28,7 @@ if __name__ == '__main__':
  
  
 ######### Command line
-hadoop fs -put /bpl/server/data/npl_basic/* hdfs://mycompany.com:8020/tmp/dev3/raw_data/npl_basic/
+hadoop fs -put /prodd/server/data/npl_basic/* hdfs://mycompany.com:8020/tmp/dev3/raw_data/npl_basic/
 
 
 #####Publish a File to S3
@@ -64,7 +64,7 @@ spark = (
  
  
 def BasicMaster():
-    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines = spark.read.format("csv").load("file:///prod/server/data/npl_basic" ,header="true")
     lines.printSchema()
     lines.write.format("csv").save("s3a://hadoop/tmp/dev3/raw_data/npl_basic/" ,mode="overwrite")
 if __name__ == '__main__':
@@ -72,7 +72,7 @@ if __name__ == '__main__':
                              
  
 ### Command line
-hadoop fs -cp /bpl/server/data/npl_basic/* s3a://hadoop/tmp/dev3/raw_data/npl_basic/
+hadoop fs -cp /prod/server/data/npl_basic/* s3a://hadoop/tmp/dev3/raw_data/npl_basic/
 ###Create Hive External Table
 ####Create External Table
 ---- SQL Code to create a external table  pointing the delimited data--
@@ -169,7 +169,7 @@ spark = (
 )
  
 def BasicMaster():
-    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines = spark.read.format("csv").load("file:///prod/server/data/npl_basic" ,header="true")
     lines.printSchema()
     lines.write.option("path", "/tmp/dev3/transformed_data/npl_basic/").mode("Overwrite").saveAsTable("default.npl_basic")
 if __name__ == '__main__':
@@ -217,7 +217,7 @@ if __name__ == '__main__':
  
 ----- Spark for a parquet external table ( default is parquet )
 def BasicMaster():
-    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines = spark.read.format("csv").load("file:///prod/server/data/npl_basic" ,header="true")
     lines.printSchema()
     lines.write.format("parquet").option("path", "/tmp/dev3/transformed_data/npl_basic_prq/").mode("Overwrite").saveAsTable("default.npl_basic_prq")
 if __name__ == '__main__':
@@ -226,7 +226,7 @@ if __name__ == '__main__':
 Ingesting Data from Sqoop
 Sqoop Import from RDBMS
 sqoop import --driver oracle.jdbc.driver.OracleDriver \
---connect jdbc:oracle:thin:xxxxx/xxxxxx@172.19.0.104:1549/rdam_dev1  \
+--connect jdbc:oracle:thin:xxxxx/xxxxxx@mycompany.com:1549/garden_dev1  \
 --query 'select ID, VERSION, REQUESTSTATUS, DATERECEIVED, NAME, DATEDELIVERED, REQUESTOR_ID, GROUP_ID, RESPONSEFILE, REQUESTFILE, CLIENTSUBDIRECTORY, PARENTREQ_ID, POLICY from  dom_consumerrequest  WHERE  $CONDITIONS' \
 --target-dir /tmp/dev3/raw_data/rdam/DOM_CONSUMERREQUEST3 \
 --fields-terminated-by '|'
