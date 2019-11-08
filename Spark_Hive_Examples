@@ -1,0 +1,288 @@
+####Publish a File to Hdfs
+from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
+ 
+settings = [
+    ('spark.sql.hive.hiveserver2.jdbc.url',
+     'jdbc:hive2://npl_master01.dev3.mycompany.com:10000/default'),
+]
+ 
+conf = SparkConf().setAppName("npl_Basic").setAll(settings)
+spark = (
+    SparkSession
+    .builder
+    .config(conf=conf)
+    .master('local[*]')
+    .config("spark.hadoop.metastore.catalog.default", "hive")
+    .enableHiveSupport()
+    .getOrCreate()
+)
+ 
+def BasicMaster():
+    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines.printSchema()
+    lines.write.format("csv").save("hdfs://mycompany.com:8020/tmp/dev3/raw_data/npl_basic/" ,mode="overwrite")
+if __name__ == '__main__':
+    BasicMaster()
+ 
+ 
+ 
+######### Command line
+hadoop fs -put /bpl/server/data/npl_basic/* hdfs://mycompany.com:8020/tmp/dev3/raw_data/npl_basic/
+
+
+#####Publish a File to S3
+from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
+ 
+settings = [
+    ('spark.sql.hive.hiveserver2.jdbc.url',
+     'jdbc:hive2://npl_master01.dev3.mycompany.com:10000/default'),
+]
+ 
+conf = SparkConf().setAppName("npl_BASIC").setAll(settings)
+spark = (
+    SparkSession
+    .builder
+    .config(conf=conf)
+    .master('local[*]')
+    .config("spark.hadoop.metastore.catalog.default", "hive")
+    .config("spark.hadoop.fs.s3a.committer.name", "directory")
+    .config("spark.hadoop.fs.s3a.path.style.access", "true")
+    .config("spark.hadoop.fs.s3a.fast.upload", "true")
+    .config("spark.hadoop.fs.s3a.proxy.host", "s3.dev.mycompany.com")
+    .config("spark.hadoop.fs.s3a.fast.upload.buffer", "bytebuffer")
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+    .config("spark.hadoop.fs.s3a.access.key", "XXXXXXXXXXXXXXXXXXX")
+    .config("spark.hadoop.fs.s3a.secret.key", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    .config("spark.sql.sources.commitProtocolClass", "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol")
+    .config("spark.sql.parquet.output.committer.class", "org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter")
+    .config("spark.hadoop.metastore.catalog.default", "hive")
+    .enableHiveSupport()
+    .getOrCreate()
+)
+ 
+ 
+def BasicMaster():
+    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines.printSchema()
+    lines.write.format("csv").save("s3a://hadoop/tmp/dev3/raw_data/npl_basic/" ,mode="overwrite")
+if __name__ == '__main__':
+    BasicMaster()
+                             
+ 
+### Command line
+hadoop fs -cp /bpl/server/data/npl_basic/* s3a://hadoop/tmp/dev3/raw_data/npl_basic/
+###Create Hive External Table
+####Create External Table
+---- SQL Code to create a external table  pointing the delimited data--
+ 
+ 
+CREATE EXTERNAL TABLE npl_basic_text (
+  document_identifier string,
+  primary_identifier string,
+  dataproduct_version string,
+  entity_update_number string,
+  entity_status string,
+  effective_time string,
+  applied_time string,
+  consumer_order_identifier string,
+  status string)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE LOCATION   'hdfs://mycompany.com:8020/tmp/dev3/raw_data/npl_basic'
+Create External Parquet Table
+Create a external parquet table
+----SQL
+ 
+  CREATE EXTERNAL TABLE npl_basic_prq(
+  document_identifier string,
+  primary_identifier string,
+  dataproduct_version string,
+  entity_update_number string,
+  entity_status string,
+  effective_time string,
+  applied_time string,
+  consumer_order_identifier string,
+  status string)
+STORED AS PARQUET
+LOCATION
+  'hdfs://mycompany.com:8020/tmp/dev3/transformed_data/npl_basic_prq' ;
+Create External Table from CSV
+External Table From CSV
+----SQL
+CREATE EXTERNAL TABLE npl_basic_text (
+  document_identifier string,
+  primary_identifier string,
+  dataproduct_version string,
+  entity_update_number string,
+  entity_status string,
+  effective_time string,
+  applied_time string,
+  consumer_order_identifier string,
+  status string)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE LOCATION   'hdfs://mycompany.com:8020/tmp/dev3/raw_data/npl_basic'
+
+#####Create External Table using PyHive
+
+#####Create Table Using Pyhive
+from pyhive import hive
+host_name = "npl_master01.dev3.mycompany.com"
+port = 10000
+user = "admin"
+password = "admin"
+database="default"
+ 
+def hiveconnection(host_name, port, user,password, database):
+    conn = hive.Connection(host=host_name, port=port, username=user, password=password,
+                           database=database, auth='CUSTOM')
+    cur = conn.cursor()
+    cur.execute('create external table npl_basic_pyhive_ext ( test1 int )')
+    result = cur.getSchema()
+    return result
+output = hiveconnection(host_name, port, user,password, database)
+print(output)
+
+
+
+####Create External Table using Spark SQL
+####Create External table with spark
+from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
+ 
+settings = [
+    ('spark.sql.hive.hiveserver2.jdbc.url',
+     'jdbc:hive2://npl_master01.dev3.mycompany.com:10000/default'),
+]
+ 
+conf = SparkConf().setAppName("npl_BASIC").setAll(settings)
+spark = (
+    SparkSession
+    .builder
+    .config(conf=conf)
+    .master('local[*]')
+    .config("spark.hadoop.metastore.catalog.default", "hive")
+    .enableHiveSupport()
+    .getOrCreate()
+)
+ 
+def BasicMaster():
+    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines.printSchema()
+    lines.write.option("path", "/tmp/dev3/transformed_data/npl_basic/").mode("Overwrite").saveAsTable("default.npl_basic")
+if __name__ == '__main__':
+    BasicMaster()
+ 
+ 
+ 
+ 
+ 
+---- method two using the spark.sql
+ 
+ 
+from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
+ 
+settings = [
+    ('spark.sql.hive.hiveserver2.jdbc.url',
+     'jdbc:hive2://npl_master01.dev3.mycompany.com:10000/default'),
+]
+ 
+conf = SparkConf().setAppName("npl_BASIC").setAll(settings)
+spark = (
+    SparkSession
+    .builder
+    .config(conf=conf)
+    .master('local[*]')
+    .config("spark.hadoop.metastore.catalog.default", "hive")
+    .enableHiveSupport()
+    .getOrCreate()
+)
+ 
+def BasicMaster():
+    lines = spark.sql("""create external  table npl_basic_spark13 ( test2 string ,test1 string) location '/tmp/dev3/raw_data/npl_basic_spark_ext' """)
+    lines = spark.sql("show create table npl_basic_spark13")
+    lines.show(100 , truncate=False)
+if __name__ == '__main__':
+    BasicMaster()
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+----- Spark for a parquet external table ( default is parquet )
+def BasicMaster():
+    lines = spark.read.format("csv").load("file:///bpl/server/data/npl_basic" ,header="true")
+    lines.printSchema()
+    lines.write.format("parquet").option("path", "/tmp/dev3/transformed_data/npl_basic_prq/").mode("Overwrite").saveAsTable("default.npl_basic_prq")
+if __name__ == '__main__':
+    BasicMaster()
+
+Ingesting Data from Sqoop
+Sqoop Import from RDBMS
+sqoop import --driver oracle.jdbc.driver.OracleDriver \
+--connect jdbc:oracle:thin:xxxxx/xxxxxx@172.19.0.104:1549/rdam_dev1  \
+--query 'select ID, VERSION, REQUESTSTATUS, DATERECEIVED, NAME, DATEDELIVERED, REQUESTOR_ID, GROUP_ID, RESPONSEFILE, REQUESTFILE, CLIENTSUBDIRECTORY, PARENTREQ_ID, POLICY from  dom_consumerrequest  WHERE  $CONDITIONS' \
+--target-dir /tmp/dev3/raw_data/rdam/DOM_CONSUMERREQUEST3 \
+--fields-terminated-by '|'
+-m 1
+
+###Query RAW Data
+####Query External Table from PyHive
+
+####Pyhive To Query a Hive Table
+from pyhive import hive
+host_name = "npl_master01.dev3.mycompany.com"
+port = 10000
+user = "admin"
+password = "admin"
+database="default"
+ 
+def hiveconnection(host_name, port, user,password, database):
+    conn = hive.Connection(host=host_name, port=port, username=user, password=password,
+                           database=database, auth='CUSTOM')
+    cur = conn.cursor()
+    cur.execute('select * from npl_basic_prq2')
+    ##result = cur.getSchema()
+    ##result = cur.getSchema()
+    ####sult = cur.fetchall()
+    for result in cur.fetchall():
+        print(result)
+    return result
+output = hiveconnection(host_name, port, user,password, database)
+print(output)
+
+
+####Query External Table using Spark SQL
+
+
+from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
+ 
+settings = [
+    ('spark.sql.hive.hiveserver2.jdbc.url',
+     'jdbc:hive2://npl_master01.dev3.mycompany.com:10000/default'),
+]
+ 
+conf = SparkConf().setAppName("npl_BASIC").setAll(settings)
+spark = (
+    SparkSession
+    .builder
+    .config(conf=conf)
+    .master('local[*]')
+    .config("spark.hadoop.metastore.catalog.default", "hive")
+    .enableHiveSupport()
+    .getOrCreate()
+)
+ 
+def BasicMaster():
+    lines = spark.sql("select * from npl_basic_prq2")
+    lines.show(10,truncate=False)
+if __name__ == '__main__':
+    BasicMaster()
+
